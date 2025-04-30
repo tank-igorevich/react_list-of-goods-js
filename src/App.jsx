@@ -16,39 +16,71 @@ export const goodsFromServer = [
 ];
 
 export const App = () => {
-  const [goods, setGoods] = useState([...goodsFromServer]);
   const [sortType, setSortType] = useState(null); // 'alphabet' | 'length' | null
   const [isReversed, setIsReversed] = useState(false);
+  const [goods, setGoods] = useState([...goodsFromServer]);
+
+  const sortGoods = (type, reversed) => {
+    let sorted = [...goodsFromServer];
+
+    if (type === 'alphabet') {
+      sorted.sort((a, b) => a.localeCompare(b));
+    } else if (type === 'length') {
+      sorted.sort((a, b) => a.length - b.length);
+    }
+
+    if (reversed) {
+      sorted.reverse();
+    }
+
+    return sorted;
+  };
+
+  const updateGoods = (newSortType = sortType, newReversed = isReversed) => {
+    const sortedGoods = sortGoods(newSortType, newReversed);
+    setGoods(sortedGoods);
+  };
 
   const handleSortAlphabetically = () => {
-    const sorted = [...goodsFromServer].sort((a, b) => a.localeCompare(b));
-
-    setGoods(isReversed ? [...sorted].reverse() : sorted);
-    setSortType('alphabet');
+    const newSortType = 'alphabet';
+    setSortType(newSortType);
+    updateGoods(newSortType, isReversed);
   };
 
   const handleSortByLength = () => {
-    const sorted = [...goodsFromServer].sort((a, b) => a.length - b.length);
-
-    setGoods(isReversed ? [...sorted].reverse() : sorted);
-    setSortType('length');
+    const newSortType = 'length';
+    setSortType(newSortType);
+    updateGoods(newSortType, isReversed);
   };
 
   const handleReverse = () => {
-    const reversedGoods = [...goods].reverse();
-
-    setGoods(reversedGoods);
-    setIsReversed(prev => !prev);
+    const newReversed = !isReversed;
+    setIsReversed(newReversed);
+    updateGoods(sortType, newReversed);
   };
 
   const handleReset = () => {
-    setGoods([...goodsFromServer]);
     setSortType(null);
     setIsReversed(false);
+    setGoods([...goodsFromServer]);
   };
 
-  const isModified = () => {
-    return JSON.stringify(goods) !== JSON.stringify(goodsFromServer);
+  const isModified = JSON.stringify(goods) !== JSON.stringify(goodsFromServer);
+
+  const getButtonClass = (buttonType) => {
+    const baseClass = {
+      alphabet: 'button is-info',
+      length: 'button is-success',
+      reverse: 'button is-warning',
+      reset: 'button is-danger',
+    }[buttonType];
+
+    const isActive =
+      (buttonType === 'alphabet' && sortType === 'alphabet') ||
+      (buttonType === 'length' && sortType === 'length') ||
+      (buttonType === 'reverse' && isReversed);
+
+    return isActive ? baseClass : `${baseClass} is-light`;
   };
 
   return (
@@ -56,7 +88,7 @@ export const App = () => {
       <div className="buttons">
         <button
           type="button"
-          className={`button is-info ${sortType === 'alphabet' ? '' : 'is-light'}`}
+          className={getButtonClass('alphabet')}
           onClick={handleSortAlphabetically}
         >
           Sort alphabetically
@@ -64,7 +96,7 @@ export const App = () => {
 
         <button
           type="button"
-          className={`button is-success ${sortType === 'length' ? '' : 'is-light'}`}
+          className={getButtonClass('length')}
           onClick={handleSortByLength}
         >
           Sort by length
@@ -72,16 +104,16 @@ export const App = () => {
 
         <button
           type="button"
-          className={`button is-warning ${isReversed ? '' : 'is-light'}`}
+          className={getButtonClass('reverse')}
           onClick={handleReverse}
         >
           Reverse
         </button>
 
-        {isModified() && (
+        {isModified && (
           <button
             type="button"
-            className="button is-danger"
+            className={getButtonClass('reset')}
             onClick={handleReset}
           >
             Reset
