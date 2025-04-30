@@ -22,18 +22,21 @@ export const App = () => {
 
   const handleSortAlphabetically = () => {
     const sorted = [...goodsFromServer].sort((a, b) => a.localeCompare(b));
+
     setGoods(isReversed ? [...sorted].reverse() : sorted);
     setSortType('alphabet');
   };
 
   const handleSortByLength = () => {
     const sorted = [...goodsFromServer].sort((a, b) => a.length - b.length);
+
     setGoods(isReversed ? [...sorted].reverse() : sorted);
     setSortType('length');
   };
 
   const handleReverse = () => {
     const reversedGoods = [...goods].reverse();
+
     setGoods(reversedGoods);
     setIsReversed(prev => !prev);
   };
@@ -45,9 +48,7 @@ export const App = () => {
   };
 
   const isModified = () => {
-    return (
-      JSON.stringify(goods) !== JSON.stringify(goodsFromServer)
-    );
+    return JSON.stringify(goods) !== JSON.stringify(goodsFromServer);
   };
 
   return (
